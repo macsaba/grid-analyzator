@@ -19,7 +19,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "tasks/default_task.h"
 #include "tasks/logger_task.h"
+#include "tasks/blinker_task.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,21 +46,6 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-
-/* Definitions for blinkerTask */
-osThreadId_t blinkerTaskHandle;
-const osThreadAttr_t blinkerTask_attributes = {
-  .name = "blinkerTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -67,9 +54,6 @@ const osThreadAttr_t blinkerTask_attributes = {
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-void StartDefaultTask(void *argument);
-
-void StartBlinkerTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -135,13 +119,13 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  DefaultTask_Init();
 
   /* creation of loggerTask */
   LoggerTask_Init();
 
   /* creation of blinkerTask */
-  blinkerTaskHandle = osThreadNew(StartBlinkerTask, NULL, &blinkerTask_attributes);
+  BlinkerTask_Init();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -290,48 +274,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
 
 
-
-/* USER CODE BEGIN Header_StartBlinkerTask */
-/**
-* @brief Function implementing the blinkerTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartBlinkerTask */
-void StartBlinkerTask(void *argument)
-{
-  /* USER CODE BEGIN StartBlinkerTask */
-  /* Infinite loop */
-	TickType_t lastWake = xTaskGetTickCount();
-
-	  /* Infinite loop */
-	  for(;;)
-	  {
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-		vTaskDelayUntil(&lastWake, pdMS_TO_TICKS(500));
-		LoggerTask_Log("LED toggled\n");
-	  }
-  /* USER CODE END StartBlinkerTask */
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
