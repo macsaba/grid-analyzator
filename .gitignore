@@ -1,0 +1,15 @@
+# STM32CubeIDE
+Debug/
+Release/
+.build/
+.settings/
+.project
+.cproject
+
+# CubeMX
+*.ioc.bak
+
+# OS / IDE
+*.log
+*.tmp
+.DS_Store
